@@ -44,11 +44,14 @@ enum Effect {
     SinusRunner,
     SinusRunner2,
     ColourTime,
+    EffectNone,
 };
 
 // Choose your effect
-static const Effect effect = SinusRunner2;
+static Effect effect = SinusRunner2;
 
+// Store previous button state - for detect button pressing only once
+int buttonStatePrev = HIGH;
 
 // Initialize GPIO pins
 void setup() {
@@ -56,17 +59,45 @@ void setup() {
     pinMode(LED_R, OUTPUT);
     pinMode(LED_G, OUTPUT);
     pinMode(LED_B, OUTPUT);
+    pinMode(LED_LOW_POWER, OUTPUT);
 
+    // Set button pin for digital input
+    pinMode(BUTTON_MODE, INPUT);
+    buttonStatePrev = digitalRead(BUTTON_MODE);
+    
     // Set pot pins as input
     pinMode(POT_1, INPUT);
     pinMode(POT_2, INPUT);
     pinMode(POT_3, INPUT);
+
+    // Set voltmeter pin for analog input
+    pinMode(VOL_METER, INPUT);
 }
 
 
 // Main loop
 void loop() {
-
+    // Voltage divider has ratio = 3.6. For 9V threshold is = (9/3.6)/5*1023
+    int powerValue = analogRead(VOL_METER); // 0 ... 1023
+    if (powerValue < 511) {
+        // Enter in idle state - long sleep
+        digitalWrite(LED_LOW_POWER, HIGH);
+        delay(100);
+    } else {
+        digitalWrite(LED_LOW_POWER, LOW);
+    }
+    
+    int state = digitalRead(BUTTON_MODE);
+    if (state != buttonStatePrev) {
+        if (state == LOW) {
+            effect = (Effect)(effect + 1);
+            if (effect == EffectNone) {
+                effect = RGBControl;
+            }
+        }
+        buttonStatePrev = state;
+    }
+    
     switch (effect) {
         case Colorwheel:
             effect_colorwheel(); 

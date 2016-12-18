@@ -29,7 +29,15 @@
 #define LED_G 6
 #define LED_B 5
 
+// Push button
+#define BUTTON_MODE 8
+
 // Pots
 #define POT_1 14
 #define POT_2 15
 #define POT_3 16
+
+// Voltage meter
+#define VOL_METER 19
+#define LED_LOW_POWER 13
+
